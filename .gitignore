@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+
+# runtime / logs
+*.log
+daemon.json
+state.json
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+checkin.json
+checkin.log
+page/live.js

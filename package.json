@@ -1,0 +1,82 @@
+{
+  "name": "magpie-agent-trae-bridge",
+  "version": "0.7.1",
+  "type": "module",
+  "description": "Make Trae (CN / global) use every model and routing group configured in Magpie. The model picker returns the Magpie catalog; Trae's own login is untouched.",
+  "license": "MIT",
+  "magpie": {
+    "agent": "./agent.js",
+    "hooks": "./checkin.hooks.mjs",
+    "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAC5ElEQVR42uXP+4uMYRwF8PN3sFgsy97X3q+zu/a+6577/ZK7v0UiiSSRRJJIIkkkkSSSSBJJJIkk0tE79U6zszPPPN/vY2ab9zn1+Wme95z5Yt8o4YgTzOn/Y+/IXwkWCOubsGf4jw0WqKy3YffwbxNGRMYbsWvoVyaMmLR3Yufgz3QYUeNuxY6BH6kYcWPuxfb+78noicTN2Nb/LRk9kbgZW/u+huiZ+N3Y0vslRM/E78bm+Z8D9BSwqedTgJ4CNvZ8DNBTwIbuDwF6Cljf9T5ATwHrYu/oKjn/oy+fe1gbe0sX6eLamc89rOl8QymbaHpddzWdWN3xmlI20fS67mo6sar9FaVso+l22dT0YmXbS0pJounX7mm6saLtBaUk0fRr9zTdWN76nFLSaDY0W5p+LGt5RilNNDvSLU0/ljY/pZQm+djRbGBJ0xNKaZPrDc0tWNz0mFLa5HpDcwsWNT6ilEty2a+5BQsbHlLKNbnq1tyCBfUPKGVKtt/DN5pul95MMFp3n1KmZPs9fKPpdunNBCN19yhlis2b5He2veE30s5sMDzvLqVMsXmT+lby3rbPFoZq71DKFNt32re2fbYwWHObUqZI3obvbd5otm1goPoWpUyRvLWNdtsG+qtvUsoU6ftscd3OBn1VNyhliuYbSZ9m2wS9ldcpZYrmG0mXZtsEPRXXKGWK5htJl2bbBN3lVyllivY72x7tdiboKr9CKVNcvrXpcNlOB7Gyy5QyxeVbmw6X7XTQOfcSpUzJ9feu26nQMecipUxx6cjXdjK0l16glCnannxvh9BWep4+Q+vscwF6CmiZdTZATwHNJWcC9BTQVHI6QE8BjTNPBegpoGHGyRA9E78b9dNPhOiZ+N2oKz6ejJ5I3Iza4mPJ6InEzaiZdjQVI27MvaieeiQdRtS4W1E15XAmjJi0d6Ky6JAJIyLjjagoOmiDBSrrbSiffECCBcL6JpRN2u+KE8zp//8DmdUxqOKyOEQAAAAASUVORK5CYII=",
+    "name": "Trae · Magpie Bridge",
+    "page": {
+      "title": "Trae check-in",
+      "titles": {
+        "zh": "Trae 签到",
+        "zh-TW": "Trae 簽到",
+        "ja": "Trae チェックイン",
+        "de": "Trae-Check-in"
+      },
+      "file": "page/index.html",
+      "icon": "page/icon.svg"
+    }
+  },
+  "main": "./plugin.js",
+  "engines": {
+    "node": ">=20",
+    "magpie": ">=0.1.1318"
+  },
+  "os": [
+    "win32",
+    "darwin",
+    "linux"
+  ],
+  "scripts": {
+    "test": "node test/run.mjs",
+    "icon": "node scripts/make-icon.mjs --write",
+    "install-bridge": "node bin/trae-magpie.js install",
+    "status": "node bin/trae-magpie.js status",
+    "uninstall": "node bin/trae-magpie.js uninstall",
+    "doctor": "node bin/trae-magpie.js doctor",
+    "serve": "node bin/trae-magpie.js serve"
+  },
+  "files": [
+    "agent.js",
+    "plugin.js",
+    "bin",
+    "lib",
+    "icon.png",
+    "scripts",
+    "setup.cmd",
+    "setup.ps1",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "checkin.hooks.mjs",
+    "page"
+  ],
+  "keywords": [
+    "magpie",
+    "magpie-agent",
+    "trae",
+    "byok",
+    "routing-group",
+    "magpie-page"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wovoemj/magpie-agent-trae-bridge.git"
+  },
+  "homepage": "https://github.com/Wovoemj/magpie-agent-trae-bridge#readme",
+  "bugs": {
+    "url": "https://github.com/Wovoemj/magpie-agent-trae-bridge/issues"
+  },
+  "author": "Wovoemj",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "bin": {
+    "trae-magpie": "./bin/trae-magpie.js"
+  }
+}

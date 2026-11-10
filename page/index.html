@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trae 签到</title>
+<script src="_magpie/bridge.js"></script>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0; padding: 22px 24px 40px;
+    font: 14px/1.55 ui-sans-serif, system-ui, "Segoe UI", "Microsoft YaHei", sans-serif;
+    color: var(--magpie-fg, #1c1c1e);
+    background: var(--magpie-bg, transparent);
+  }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  .head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .head h1 { margin: 0; font-size: 19px; font-weight: 650; letter-spacing: .2px; }
+  .pill {
+    margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 10px; border-radius: 999px; font-size: 12px;
+    border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+    opacity: .82; white-space: nowrap;
+  }
+  .pill i { width: 7px; height: 7px; border-radius: 50%; background: #9aa0a6; }
+  .pill.on i { background: #2ea043; }
+  .pill.off i { background: #d1573f; }
+  .card {
+    border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+    border-radius: 12px; padding: 16px 18px; background: color-mix(in srgb, currentColor 2.5%, transparent);
+  }
+  .hero { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .hero .state { font-size: 17px; font-weight: 600; }
+  .hero .day { font-variant-numeric: tabular-nums; opacity: .7; font-size: 13px; }
+  .hero .note { flex-basis: 100%; opacity: .78; font-size: 12.5px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 10px; margin: 10px 0; }
+  .grid .card { padding: 12px 14px; }
+  .k { display: block; font-size: 12px; opacity: .62; margin-bottom: 2px; }
+  .grid b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  button {
+    font: inherit; font-size: 13px; padding: 7px 14px; border-radius: 9px; cursor: pointer;
+    border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+    background: color-mix(in srgb, currentColor 6%, transparent); color: inherit;
+  }
+  button:hover:not(:disabled) { background: color-mix(in srgb, currentColor 11%, transparent); }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary { background: var(--magpie-accent, #3b6cf6); border-color: transparent; color: #fff; }
+  .time { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; font-size: 13px; opacity: .9; }
+  input {
+    width: 74px; font: inherit; font-size: 13px; padding: 6px 8px; text-align: center;
+    border-radius: 8px; color: inherit; background: transparent;
+    border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+  }
+  .fine { margin: 14px 2px 0; font-size: 12px; opacity: .58; line-height: 1.6; }
+  a { color: inherit; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="head">
+    <h1>Trae 每日签到</h1>
+    <span class="pill" id="pill"><i></i><span id="pillText">连接中…</span></span>
+  </header>
+
+  <section class="card hero">
+    <span class="state" id="state">正在读取…</span>
+    <span class="day" id="day"></span>
+    <span class="note" id="note"></span>
+  </section>
+
+  <section class="grid">
+    <div class="card"><span class="k">自动签到</span><b id="enabled">—</b></div>
+    <div class="card"><span class="k">每天（北京时间）</span><b id="at">—</b></div>
+    <div class="card"><span class="k">连着的 Trae 窗口</span><b id="clients">—</b></div>
+    <div class="card"><span class="k">Magpie 原生签到</span><b id="native">—</b></div>
+    <div class="card"><span class="k">账号</span><b id="acct">—</b></div>
+  </section>
+
+  <section class="card actions">
+    <button type="button" class="primary" id="run">立即签到</button>
+    <button type="button" id="toggle">关掉自动签到</button>
+    <button type="button" id="account">浏览器登录</button>
+    <label class="time">时间
+      <input id="time" inputmode="numeric" maxlength="5" placeholder="09:00" aria-label="每天签到时间">
+      <button type="button" id="save">保存</button>
+    </label>
+  </section>
+
+  <p class="fine" id="fine">页面跑在 Magpie 的沙箱里，自己连不上网：它读的是旁边的 <code>live.js</code>，
+    由本插件的插件宿主每 2 秒从桥守护进程（127.0.0.1:3417）拉一次、变了才重写。按钮走反向的路 ——
+    写进插件选项，Magpie 重载宿主，宿主转给守护进程。账号走「浏览器登录」：授权页在浏览器里打开，
+    登录完成由本机回环地址上的一个小服务收回令牌，存在 <code>~/.config/magpie-trae-bridge/trae-auth.json</code>（0600），
+    不需要装着 Trae，也用不着先让 Magpie 登录过 Trae。
+    签到由守护进程直接调 Trae 的签到接口做，Trae 开着关着都行；有窗口连着时也可以交给窗口。</p>
+</main>
+
+<script src="app.js"></script>
+
+<script>
+  // says so when app.js did not run: a frame that blocks scripts leaves
+  // the page looking like it is still connecting, which is a lie
+  setTimeout(function () {
+    var p = document.getElementById('pill');
+    if (p && p.textContent.indexOf('\u8fde\u63a5\u4e2d') >= 0) p.textContent = '脚本没有运行';
+  }, 3000);
+</script>
+</body>
+</html>
