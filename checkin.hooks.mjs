@@ -4,7 +4,7 @@
 //
 // A page runs in a frame sandboxed to scripts alone, in an origin of its own:
 // it has no way to the window, to magpie's API or to the network. So this
-// module asks the bridge daemon at 127.0.0.1:3417 and writes what it heard to
+// module asks the bridge daemon (on the port it recorded) and writes what it heard to
 // page/live.js, beside the page, which loads it again every two seconds. What
 // the reader presses goes the other way: the page calls magpie.options.set(),
 // magpie writes it to plugins.json and reloads this module, and start() acts
@@ -20,7 +20,26 @@ const LIVE = join(PAGE, "live.js")
 const PREFIX = "globalThis.MagpieTraeCheckinLive = "
 const EVERY = 2000
 const WAIT_MS = 1500
-const BRIDGE = (process.env.MAGPIE_TRAE_BRIDGE_URL || "http://127.0.0.1:3417").replace(/\/+$/, "")
+const BRIDGE_FALLBACK = 3417
+
+/**
+ * The address the bridge daemon is actually on.
+ *
+ * The daemon moves off 3417 when that port is taken (it records the port it
+ * chose), so a hardcoded port reads as "the daemon is not answering" while it is
+ * running fine one number higher. Resolved per call, not once at load, because
+ * the daemon can be restarted onto another port while magpie stays up.
+ */
+export function bridgeUrl() {
+  const explicit = process.env.MAGPIE_TRAE_BRIDGE_URL
+  if (explicit) return explicit.replace(/\/+$/, "")
+  for (const name of ["daemon.json", "state.json"]) {
+    const record = readJSON(join(configDir(), name))
+    const port = Number(record && record.port)
+    if (port > 0) return `http://127.0.0.1:${port}`
+  }
+  return `http://127.0.0.1:${BRIDGE_FALLBACK}`
+}
 const BEIJING_OFFSET_MS = 8 * 3600 * 1000
 
 let ticking = null
@@ -83,7 +102,7 @@ async function ask(pathname, init = {}, timeoutMs = WAIT_MS) {
   const ctl = new AbortController()
   const t = setTimeout(() => ctl.abort(), timeoutMs)
   try {
-    const r = await fetch(BRIDGE + pathname, { ...init, signal: ctl.signal })
+    const r = await fetch(bridgeUrl() + pathname, { ...init, signal: ctl.signal })
     return await r.json()
   } finally {
     clearTimeout(t)
@@ -92,7 +111,7 @@ async function ask(pathname, init = {}, timeoutMs = WAIT_MS) {
 
 /** What the page shows: the daemon's own state, and magpie's beside it. */
 export async function collect(now = Date.now()) {
-  const out = { v: 1, written: now, today: beijingDay(now), bridge: BRIDGE, ok: false }
+  const out = { v: 1, written: now, today: beijingDay(now), bridge: bridgeUrl(), ok: false }
   try {
     const both = await Promise.all([ask("/health"), ask("/checkin"), ask("/auth")])
     const health = both[0]
@@ -229,7 +248,7 @@ export function start(opts = {}) {
     ticking = setInterval(() => { void write() }, EVERY)
     ticking.unref?.()
   }
-  return { bridge: BRIDGE, page: PAGE }
+  return { bridge: bridgeUrl(), page: PAGE }
 }
 
 // the host loads this module as the plugin's gateway, and a gateway has
